@@ -1,12 +1,75 @@
-version: '3'
+version: '3.8'
 
 services:
+  # RabbitMQ Message Broker
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: delivery-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: "admin"
       RABBITMQ_DEFAULT_PASS: "admin"
       RABBITMQ_DEFAULT_VHOST: "/"
     ports:
-      - "15672:15672"
-      - "5672:5672"
+      - "15672:15672"  # Management UI
+      - "5672:5672"    # AMQP
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - delivery-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Drivers API Service
+  drivers-api:
+    image: waynerramos/delivery-drivers-api:latest
+    ports:
+      - "8081:8081"
+    networks:
+      - delivery-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # Simulator Service
+  simulator:
+    image: waynerramos/delivery-simulator:latest
+    container_name: delivery-simulator
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+      - RABBITMQ_DEFAULT_HOST=rabbitmq
+      - RABBITMQ_DEFAULT_PORT=5672
+      - RABBITMQ_DEFAULT_VHOST=/
+      - RABBITMQ_CONSUMER_QUEUE=orders
+      - RABBITMQ_DESTINATION=amq.topic
+      - RABBITMQ_DESTINATION_ROUTING_KEY=delivery.updates
+      - APP_PORT=8082
+      - APP_ENV=development
+    volumes:
+      - ./destinations:/app/destinations
+    networks:
+      - delivery-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # Frontend (React) - Placeholder for future implementation
+  frontend:
+    image: waynerramos/delivery-frontend:latest
+    ports:
+      - "3000:80"
+    networks:
+      - delivery-network
+    depends_on:
+      - drivers-api
+      - simulator
+
+volumes:
+  rabbitmq_data:
+
+networks:
+  delivery-network:
+    driver: bridge
