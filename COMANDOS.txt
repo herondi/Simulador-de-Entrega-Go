@@ -1,0 +1,356 @@
+╔═══════════════════════════════════════════════════════════════╗
+║              COMANDOS DELIVERY SIMULATOR - V2.0               ║
+║                                                               ║
+║  NOVO: Use start-adminer.bat para interface web do banco! 🌐 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🆕 NOVIDADES DESTA VERSÃO
+=========================
+• database-manager.bat - Gerenciador visual de banco de dados
+• start-adminer.bat - Iniciar interface web do banco rapidamente
+• push-postgres-dockerhub.bat - Enviar PostgreSQL para Docker Hub  
+• update-all-images.bat - Atualizar todas as imagens no Docker Hub
+• docker-compose-adminer.yml - Interface web para PostgreSQL
+• ACESSO-BANCO.md - Guia completo de acesso ao banco
+
+🚀 INÍCIO RÁPIDO
+================
+delivery.bat                        # Menu interativo (RECOMENDADO)
+delivery.bat → 7                    # Inicia tudo + abre navegador
+database-manager.bat                # NOVO! Acessar banco visualmente
+docker-compose up -d && open-browser.bat  # Comando direto
+
+💡 Para acessar o banco de dados visualmente, use:
+   pgAdmin (desktop): database-manager.bat → 1
+   Adminer (navegador): start-adminer.bat ⭐ RECOMENDADO!
+
+📋 COMANDOS BÁSICOS
+===================
+INICIAR
+-------
+docker-compose up -d                # Cria e inicia containers
+docker-compose start                # Inicia containers existentes
+docker-compose up -d --build        # Reconstrói e inicia
+
+PARAR
+-----
+docker-compose stop                 # Para containers (mantém dados)
+docker-compose down                 # Para e remove containers
+docker-compose down -v              # Para, remove containers E volumes
+
+INTERFACE WEB PARA BANCO ⭐
+------------------------
+start-adminer.bat                   # Forma mais rápida!
+docker-compose -f docker-compose.yml -f docker-compose-adminer.yml up -d
+OU simplesmente: database-manager.bat → 2
+
+💡 Dica: Adminer é mais prático que pgAdmin para desenvolvimento!
+
+REINICIAR
+---------
+docker-compose restart              # Reinicia todos os serviços
+docker-compose restart delivery-frontend  # Reinicia apenas frontend
+docker-compose restart delivery-drivers-api  # Reinicia apenas API
+
+🌐 NAVEGADOR
+============
+open-browser.bat                    # Abre todos os serviços
+start http://localhost:3000         # Abre só Frontend
+start http://localhost:15672        # Abre só RabbitMQ
+start http://localhost:8081         # Abre só API
+
+📊 MONITORAMENTO
+================
+docker ps                           # Ver containers rodando
+docker ps -a                        # Ver todos os containers
+docker-compose ps                   # Status do projeto
+docker stats                        # Uso de recursos em tempo real
+docker images                       # Ver imagens baixadas
+
+📝 LOGS
+=======
+docker-compose logs -f              # Todos os logs em tempo real
+docker-compose logs -f --tail 50    # Últimas 50 linhas
+docker-compose logs -f delivery-frontend      # Logs do frontend
+docker-compose logs -f delivery-drivers-api   # Logs da API
+docker-compose logs -f delivery-simulator     # Logs do simulator
+docker-compose logs -f postgres              # Logs do PostgreSQL
+docker-compose logs -f rabbitmq              # Logs do RabbitMQ
+
+🔧 DESENVOLVIMENTO
+==================
+BANCO DE DADOS
+--------------
+database-manager.bat                 # Interface completa para gerenciar BD
+docker exec -it delivery-postgres psql -U postgres -d delivery_simulator
+docker exec delivery-postgres pg_dump -U postgres delivery_simulator > backup.sql
+docker exec -i delivery-postgres psql -U postgres delivery_simulator < backup.sql
+
+RABBITMQ
+--------
+docker exec -it delivery-rabbitmq rabbitmqctl status
+docker exec -it delivery-rabbitmq rabbitmqctl list_queues
+docker exec -it delivery-rabbitmq rabbitmqctl list_connections
+
+TERMINAL NOS CONTAINERS
+-----------------------
+docker exec -it delivery-frontend /bin/sh
+docker exec -it delivery-drivers-api /bin/bash
+docker exec -it delivery-postgres /bin/bash
+
+🐳 DOCKER HUB
+==============
+LOGIN
+-----
+docker login -u waynerramos
+
+PUSH IMAGENS
+------------
+docker tag postgres:16 waynerramos/delivery-postgres:latest
+docker push waynerramos/delivery-postgres:latest
+
+docker tag delivery-frontend waynerramos/delivery-frontend:latest
+docker push waynerramos/delivery-frontend:latest
+
+PULL IMAGENS
+------------
+docker pull waynerramos/delivery-simulator
+docker pull waynerramos/delivery-drivers-api
+docker pull waynerramos/delivery-frontend
+docker pull waynerramos/delivery-postgres
+
+🛠️ TROUBLESHOOTING
+==================
+LIMPAR SISTEMA
+--------------
+docker system prune                 # Remove itens não utilizados
+docker system prune -a              # Remove TUDO não utilizado
+docker volume prune                 # Remove volumes não utilizados
+docker network prune                # Remove redes não utilizadas
+
+VERIFICAR PROBLEMAS
+-------------------
+docker-compose config               # Valida docker-compose.yml
+docker logs delivery-frontend       # Ver erro específico
+docker inspect delivery-postgres    # Detalhes do container
+
+PORTAS EM USO
+-------------
+netstat -ano | findstr :3000        # Verificar porta 3000
+netstat -ano | findstr :5433        # Verificar porta 5433
+netstat -ano | findstr :8081        # Verificar porta 8081
+
+📅 WORKFLOW DIÁRIO
+==================
+MANHÃ (Iniciar trabalho)
+------------------------
+delivery.bat → 7                    # Início rápido
+  OU
+docker-compose start && open-browser.bat
+
+DURANTE O DIA
+-------------
+- Desenvolvimento normal
+- Se fechar navegador: open-browser.bat
+- Se precisar reiniciar algo: docker-compose restart [serviço]
+
+FIM DO DIA (Parar trabalho)
+---------------------------
+docker-compose stop                 # Mantém dados
+  OU
+delivery.bat → 2
+
+FIM DE SEMANA (Limpar tudo)
+----------------------------
+docker-compose down -v              # Remove tudo
+docker system prune -a              # Limpa sistema
+
+🔗 URLS DO PROJETO
+==================
+ABREM NO NAVEGADOR:
+-------------------
+Frontend ........... http://localhost:3000
+RabbitMQ UI ........ http://localhost:15672 (admin/admin)
+API REST ........... http://localhost:8081
+Adminer DB UI ...... http://localhost:8080 (opcional - precisa iniciar primeiro)
+
+NÃO ABREM NO NAVEGADOR:
+-----------------------
+PostgreSQL ......... localhost:5433 (postgres/Bystronic30@)
+                     Database: delivery_simulator
+                     Use pgAdmin (aplicativo) ou Adminer (web)
+
+🗄️ ACESSAR BANCO DE DADOS VISUALMENTE
+======================================
+⚠️ IMPORTANTE: pgAdmin NÃO abre no navegador como os outros serviços!
+      É um aplicativo desktop que você já tem instalado.
+
+OPÇÃO 1: pgAdmin (Já instalado no seu PC)
+------------------------------------------
+1. Execute: database-manager.bat → 1
+   OU
+   Procure "pgAdmin 16" no menu Iniciar
+1. Abra o pgAdmin 16
+2. Clique direito em "Servers" → "Register" → "Server"
+3. Aba General:
+   - Name: Delivery Docker
+4. Aba Connection:
+   - Host: localhost
+   - Port: 5433 (IMPORTANTE: não é 5432!)
+   - Database: delivery_simulator
+   - Username: postgres
+   - Password: Bystronic30@
+5. Clique em "Save"
+
+OPÇÃO 2: Adminer (Interface Web) 🌐
+---------------------------------
+⭐ RECOMENDADO para acesso rápido e visual no navegador!
+
+1. Execute: start-adminer.bat
+   OU
+   database-manager.bat → 2
+   OU
+   docker run -d --name delivery-adminer --network simulador-de-entrega-go_delivery-network -p 8080:8080 adminer
+2. Acesse: http://localhost:8080
+3. Preencha:
+   - Sistema: PostgreSQL
+   - Servidor: postgres
+   - Usuário: postgres
+   - Senha: Bystronic30@
+   - Base de dados: delivery_simulator
+
+OPÇÃO 3: Terminal (CLI)
+-----------------------
+database-manager.bat → 3
+OU
+docker exec -it delivery-postgres psql -U postgres -d delivery_simulator
+
+📦 ESTRUTURA DOS CONTAINERS
+============================
+┌─────────────────────────────────────────────┐
+│ delivery-frontend (porta 3000)              │
+├─────────────────────────────────────────────┤
+│ delivery-drivers-api (porta 8081)           │
+├─────────────────────────────────────────────┤
+│ delivery-simulator (porta 8082)             │
+├─────────────────────────────────────────────┤
+│ delivery-rabbitmq (portas 5672, 15672)      │
+├─────────────────────────────────────────────┤
+│ delivery-postgres (porta 5433)              │
+└─────────────────────────────────────────────┘
+
+⚡ ATALHOS ÚTEIS
+================
+Ctrl+C .............. Parar logs/comando atual
+Ctrl+D .............. Sair do terminal do container
+database-manager.bat .............. Gerenciar banco de dados (menu)
+database-manager.bat → 1 .......... Abrir pgAdmin
+database-manager.bat → 2 .......... Abrir Adminer (web)
+docker-compose up -d && open-browser.bat ... Tudo em um comando
+
+💡 DICAS PRO
+============
+1. Use 'delivery.bat' para tudo - é mais fácil
+2. Mantenha o Docker Desktop aberto
+3. Verifique espaço em disco regularmente
+4. Faça backup do banco antes de grandes mudanças
+5. Use docker stats para monitorar performance
+6. pgAdmin NÃO abre no navegador - é um aplicativo desktop
+7. Para interface web do banco, use Adminer (database-manager.bat → 2)
+
+📌 COMANDOS MAIS USADOS
+=======================
+delivery.bat → 7                    # 90% das vezes (inicia tudo)
+database-manager.bat → 1            # Abrir pgAdmin (desktop)
+database-manager.bat → 2            # Abrir Adminer (navegador)
+start-adminer.bat                   # Iniciar Adminer rapidamente
+open-browser.bat                    # Abrir todos os navegadores
+docker-compose logs -f              # Ver logs para debug
+docker-compose restart              # Resolver problemas
+docker-compose stop                 # Final do dia
+
+📁 LOCALIZAÇÃO DOS SCRIPTS
+==========================
+Todos os scripts devem estar na RAIZ do projeto (pasta principal):
+
+SCRIPTS PRINCIPAIS
+------------------
+delivery.bat                        # Gerenciador principal com menu
+open-browser.bat                    # Abre todos os serviços no navegador
+start-services.bat                  # Inicia serviços (alternativa)
+database-manager.bat                # Gerenciador de banco de dados
+GUIAS E DOCUMENTAÇÃO
+--------------------
+COMANDOS.txt                        # Este arquivo de referência
+ACESSO-BANCO.md                     # Guia visual de acesso ao banco
+QUICK-START.md                      # Guia de início rápido
+USO-PRATICO.md                      # Guia de uso diário
+README.md                           # Documentação original do projeto
+
+SCRIPTS DOCKER HUB
+------------------
+push-postgres-dockerhub.bat         # Envia PostgreSQL para Docker Hub
+update-all-images.bat               # Atualiza todas as imagens no Docker Hub
+
+ARQUIVOS DOCKER
+---------------
+docker-compose.yml                  # Configuração principal do projeto
+docker-compose-local.yml            # Para build local (alternativa)
+docker-compose-dockerhub.yml        # Usa imagens do Docker Hub
+docker-compose-adminer.yml          # Adiciona interface web para PostgreSQL
+init.sql                           # Script de inicialização do banco
+
+ESTRUTURA DE PASTAS
+-------------------
+SIMULADOR-DE-ENTREGA-GO/
+├── delivery.bat
+├── open-browser.bat
+├── database-manager.bat
+├── start-adminer.bat
+├── push-postgres-dockerhub.bat
+├── update-all-images.bat
+├── docker-compose.yml
+├── docker-compose-local.yml
+├── docker-compose-dockerhub.yml
+├── docker-compose-adminer.yml
+├── init.sql
+├── COMANDOS.txt
+├── ACESSO-BANCO.md
+├── .env
+├── drivers/
+│   └── simulator/
+└── README.md
+
+📊 FERRAMENTAS VISUAIS DE BANCO DE DADOS
+=========================================
+pgAdmin ............ Aplicativo desktop (já instalado)
+                     ❌ NÃO abre no navegador automaticamente
+                     ✅ Mais recursos e ferramentas avançadas
+                     Use: database-manager.bat → 1
+
+Adminer ............ Interface web (abre no navegador) ⭐
+                     ✅ Abre direto no navegador
+                     ✅ Leve e rápido
+                     ✅ Perfeito para desenvolvimento
+                     URL: http://localhost:8080
+                     Use: start-adminer.bat
+
+Terminal ........... Linha de comando (CLI)
+                     Use: database-manager.bat → 3
+
+📥 ONDE COLOCAR OS NOVOS ARQUIVOS
+==================================
+Todos os arquivos devem ficar na RAIZ do projeto:
+
+database-manager.bat .............. Gerenciador de banco de dados
+start-adminer.bat ................. Iniciar interface web do banco
+push-postgres-dockerhub.bat ....... Enviar PostgreSQL ao Docker Hub
+update-all-images.bat ............. Atualizar todas as imagens
+docker-compose-adminer.yml ........ Configuração do Adminer
+ACESSO-BANCO.md ................... Guia de acesso ao banco
+
+Para usar qualquer um deles, execute direto no terminal!
+
+═══════════════════════════════════════════════════════════════
+Criado para o Projeto Delivery Simulator - 2025
+═══════════════════════════════════════════════════════════════
