@@ -1,0 +1,20 @@
+# Arquivo para adicionar o Adminer (interface web para PostgreSQL)
+# Use com: docker-compose -f docker-compose.yml -f docker-compose-adminer.yml up -d
+
+version: '3.8'
+
+services:
+  # Interface Web para PostgreSQL
+  adminer:
+    image: adminer:latest
+    container_name: delivery-adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - delivery-network
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha-dark  # Tema escuro
+    depends_on:
+      - postgres
+    restart: unless-stopped
