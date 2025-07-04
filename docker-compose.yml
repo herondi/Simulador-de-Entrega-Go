@@ -112,6 +112,20 @@ services:
     networks:
       - delivery-network
     restart: unless-stopped
+    # Interface Web para PostgreSQL
+  adminer:
+    image: adminer:latest
+    container_name: delivery-adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - delivery-network
+    environment:
+      ADMINER_DEFAULT_SERVER: delivery-postgres
+      ADMINER_DESIGN: pepa-linha-dark
+    depends_on:
+      - postgres
+    restart: unless-stopped
 
 networks:
   delivery-network:

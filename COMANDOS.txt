@@ -40,7 +40,7 @@ docker-compose down -v              # Para, remove containers E volumes
 
 INTERFACE WEB PARA BANCO ⭐
 ------------------------
-start-adminer.bat                   # Forma mais rápida!
+.\start-adminer.bat                   # Forma mais rápida!
 docker-compose -f docker-compose.yml -f docker-compose-adminer.yml up -d
 OU simplesmente: database-manager.bat → 2
 
