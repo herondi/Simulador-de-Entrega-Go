@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Loader } from '@googlemaps/js-api-loader';
+import axios from 'axios';
 import { 
   FiMapPin, 
   FiTruck, 
@@ -189,14 +190,28 @@ const LoadingSpinner = styled.div`
 const DeliveryMap = () => {
   const [map, setMap] = useState(null);
   const [deliveries, setDeliveries] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [activeDelivery, setActiveDelivery] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [markers, setMarkers] = useState([]);
   const mapRef = useRef(null);
 
   useEffect(() => {
     initializeMap();
-    loadDeliveries();
+    loadDrivers();
   }, []);
+
+  useEffect(() => {
+    if (drivers.length > 0) {
+      loadDeliveries();
+    }
+  }, [drivers]);
+
+  useEffect(() => {
+    if (map && deliveries.length > 0) {
+      addMarkersToMap();
+    }
+  }, [map, deliveries]);
 
   const initializeMap = async () => {
     try {
@@ -228,36 +243,131 @@ const DeliveryMap = () => {
     }
   };
 
-  const loadDeliveries = () => {
-    // Mock data - substituir por chamada real da API
-    const mockDeliveries = [
-      {
-        id: 1,
-        driver: 'João Silva',
-        destination: 'Rua das Flores, 123',
-        status: 'in-progress',
-        coordinates: { lat: -23.5510, lng: -46.6340 },
-        estimatedTime: '15 min'
-      },
-      {
-        id: 2,
-        driver: 'Maria Santos',
-        destination: 'Av. Paulista, 1000',
-        status: 'pending',
-        coordinates: { lat: -23.5520, lng: -46.6350 },
-        estimatedTime: '25 min'
-      },
-      {
-        id: 3,
-        driver: 'Pedro Costa',
-        destination: 'Rua Augusta, 500',
-        status: 'completed',
-        coordinates: { lat: -23.5530, lng: -46.6360 },
-        estimatedTime: 'Entregue'
-      }
-    ];
+  const loadDrivers = async () => {
+    try {
+      const response = await axios.get('/drivers');
+      setDrivers(response.data.drivers || []);
+    } catch (error) {
+      console.error('Error fetching drivers:', error);
+    }
+  };
 
-    setDeliveries(mockDeliveries);
+  const loadDeliveries = () => {
+    // Simular entregas baseadas nos entregadores reais
+    if (drivers.length > 0) {
+      const simulatedDeliveries = drivers.map((driver, index) => ({
+        id: index + 1,
+        driver: driver.name,
+        driverUuid: driver.uuid,
+        email: driver.email,
+        destination: getRandomDestination(),
+        status: getRandomStatus(),
+        coordinates: getRandomCoordinates(index),
+        estimatedTime: getRandomTime()
+      }));
+      setDeliveries(simulatedDeliveries);
+    } else {
+      // Fallback para dados mock se não houver drivers
+      const mockDeliveries = [
+        {
+          id: 1,
+          driver: 'João Silva',
+          destination: 'Rua das Flores, 123',
+          status: 'in-progress',
+          coordinates: { lat: -23.5510, lng: -46.6340 },
+          estimatedTime: '15 min'
+        },
+        {
+          id: 2,
+          driver: 'Maria Santos',
+          destination: 'Av. Paulista, 1000',
+          status: 'pending',
+          coordinates: { lat: -23.5520, lng: -46.6350 },
+          estimatedTime: '25 min'
+        }
+      ];
+      setDeliveries(mockDeliveries);
+    }
+  };
+
+  const getRandomDestination = () => {
+    const destinations = [
+      'Av. Paulista, 1000 - Bela Vista',
+      'Rua Augusta, 500 - Consolação',
+      'Rua Oscar Freire, 200 - Jardins',
+      'Av. Faria Lima, 1500 - Itaim Bibi',
+      'Rua 25 de Março, 100 - Centro',
+      'Shopping Ibirapuera - Moema',
+      'Mercado Municipal - Centro',
+      'Parque Ibirapuera - Vila Mariana'
+    ];
+    return destinations[Math.floor(Math.random() * destinations.length)];
+  };
+
+  const getRandomStatus = () => {
+    const statuses = ['pending', 'in-progress', 'completed'];
+    return statuses[Math.floor(Math.random() * statuses.length)];
+  };
+
+  const getRandomCoordinates = (index) => {
+    // Coordenadas aleatórias em São Paulo
+    const baseLatLng = [
+      { lat: -23.5505, lng: -46.6333 }, // Centro SP
+      { lat: -23.5520, lng: -46.6350 }, // Paulista
+      { lat: -23.5530, lng: -46.6360 }, // Augusta
+      { lat: -23.5495, lng: -46.6445 }, // Jardins
+      { lat: -23.5870, lng: -46.6860 }, // Faria Lima
+    ];
+    return baseLatLng[index] || baseLatLng[0];
+  };
+
+  const getRandomTime = () => {
+    const times = ['5 min', '15 min', '25 min', '35 min', 'Entregue'];
+    return times[Math.floor(Math.random() * times.length)];
+  };
+
+  const addMarkersToMap = () => {
+    // Limpar marcadores existentes
+    markers.forEach(marker => marker.setMap(null));
+
+    if (!map || !window.google) return;
+
+    const newMarkers = deliveries.map(delivery => {
+      const marker = new window.google.maps.Marker({
+        position: delivery.coordinates,
+        map: map,
+        title: `${delivery.driver} - ${delivery.destination}`,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: getStatusColor(delivery.status),
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2
+        }
+      });
+
+      // Adicionar info window
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: `
+          <div style="padding: 8px;">
+            <h4 style="margin: 0 0 8px 0;">${delivery.driver}</h4>
+            <p style="margin: 4px 0;"><strong>Destino:</strong> ${delivery.destination}</p>
+            <p style="margin: 4px 0;"><strong>Status:</strong> ${getStatusText(delivery.status)}</p>
+            <p style="margin: 4px 0;"><strong>Tempo:</strong> ${delivery.estimatedTime}</p>
+          </div>
+        `
+      });
+
+      marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+        setActiveDelivery(delivery);
+      });
+
+      return marker;
+    });
+
+    setMarkers(newMarkers);
   };
 
   const getStatusColor = (status) => {
