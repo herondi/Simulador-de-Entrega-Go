@@ -36,17 +36,17 @@ jobs:
         DB_NAME=delivery_simulator
         EOF
     
-    - name: ℹ️ Show system info
+    - name: ℹ️ Show versions
       run: |
         echo "Docker version:"
         docker --version
         echo "Docker Compose version:"
-        docker-compose --version
+        docker compose version
     
     - name: 🔨 Build all images
       run: |
         echo "Building Docker images..."
-        docker-compose build
+        docker compose build
         echo "✅ Build completed!"
     
     - name: 📦 List images
