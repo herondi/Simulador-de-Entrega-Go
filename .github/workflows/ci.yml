@@ -1,0 +1,63 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    name: 🏗️ Build Docker Images
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+    
+    - name: 📝 Create .env file
+      run: |
+        cat > .env << EOF
+        REACT_APP_GOOGLE_MAPS_API_KEY=AIzaSyAMxcE5jGEFb-Zwi_lhty8zs-G0Xx689Rw
+        RABBITMQ_DEFAULT_USER=admin
+        RABBITMQ_DEFAULT_PASS=admin
+        RABBITMQ_DEFAULT_HOST=localhost
+        RABBITMQ_DEFAULT_PORT=5672
+        RABBITMQ_DEFAULT_VHOST=/
+        RABBITMQ_CONSUMER_QUEUE=orders
+        RABBITMQ_DESTINATION=amq.topic
+        RABBITMQ_DESTINATION_ROUTING_KEY=delivery.updates
+        APP_PORT=8081
+        APP_ENV=development
+        DB_HOST=localhost
+        DB_PORT=5432
+        DB_USER=postgres
+        DB_PASSWORD=Bystronic30@
+        DB_NAME=delivery_simulator
+        EOF
+    
+    - name: ℹ️ Show system info
+      run: |
+        echo "Docker version:"
+        docker --version
+        echo "Docker Compose version:"
+        docker-compose --version
+    
+    - name: 🔨 Build all images
+      run: |
+        echo "Building Docker images..."
+        docker-compose build
+        echo "✅ Build completed!"
+    
+    - name: 📦 List images
+      run: |
+        echo "Images created:"
+        docker images | grep -E "(delivery|postgres|rabbitmq|adminer)" || true
+    
+    - name: ✅ Success
+      run: |
+        echo "========================================"
+        echo "✅ CI Pipeline executed successfully!"
+        echo "========================================"
+        echo "All Docker images built without errors"
+        echo "========================================"
