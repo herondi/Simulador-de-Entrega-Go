@@ -12,6 +12,12 @@ import {
 } from 'react-icons/fi';
 import axios from 'axios';
 
+// Import modals
+import AddDriverModal from '../components/AddDriverModal';
+import NewDeliveryModal from '../components/NewDeliveryModal';
+import RoutesModal from '../components/RoutesModal';
+import ReportsModal from '../components/ReportsModal';
+
 const DashboardContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -231,6 +237,12 @@ const Dashboard = () => {
     averageTime: 0
   });
 
+  // Modal states
+  const [showAddDriverModal, setShowAddDriverModal] = useState(false);
+  const [showNewDeliveryModal, setShowNewDeliveryModal] = useState(false);
+  const [showRoutesModal, setShowRoutesModal] = useState(false);  
+  const [showReportsModal, setShowReportsModal] = useState(false);
+
   useEffect(() => {
     // Fetch drivers data
     const fetchDrivers = async () => {
@@ -248,6 +260,29 @@ const Dashboard = () => {
 
     fetchDrivers();
   }, []);
+
+  // Handler functions for modals
+  const handleDriverAdded = () => {
+    // Refresh drivers list
+    const fetchDrivers = async () => {
+      try {
+        const response = await axios.get('/drivers');
+        setDrivers(response.data.drivers || []);
+        setStats(prev => ({
+          ...prev,
+          totalDrivers: response.data.drivers?.length || 0
+        }));
+      } catch (error) {
+        console.error('Error fetching drivers:', error);
+      }
+    };
+    fetchDrivers();
+  };
+
+  const handleDeliveryCreated = () => {
+    // Refresh statistics or deliveries list if needed
+    console.log('Nova entrega criada - atualizando dados...');
+  };
 
   const statCards = [
     {
@@ -380,6 +415,7 @@ const Dashboard = () => {
           <ActionButton
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => setShowAddDriverModal(true)}
           >
             <FiUsers />
             Adicionar Entregador
@@ -387,6 +423,7 @@ const Dashboard = () => {
           <ActionButton
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => setShowNewDeliveryModal(true)}
           >
             <FiMapPin />
             Nova Entrega
@@ -394,6 +431,7 @@ const Dashboard = () => {
           <ActionButton
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => setShowRoutesModal(true)}
           >
             <FiTruck />
             Ver Rotas
@@ -401,12 +439,36 @@ const Dashboard = () => {
           <ActionButton
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => setShowReportsModal(true)}
           >
             <FiAlertCircle />
             Relatórios
           </ActionButton>
         </QuickActions>
       </ContentGrid>
+
+      {/* Modals */}
+      <AddDriverModal
+        isOpen={showAddDriverModal}
+        onClose={() => setShowAddDriverModal(false)}
+        onDriverAdded={handleDriverAdded}
+      />
+      
+      <NewDeliveryModal
+        isOpen={showNewDeliveryModal}
+        onClose={() => setShowNewDeliveryModal(false)}
+        onDeliveryCreated={handleDeliveryCreated}
+      />
+      
+      <RoutesModal
+        isOpen={showRoutesModal}
+        onClose={() => setShowRoutesModal(false)}
+      />
+      
+      <ReportsModal
+        isOpen={showReportsModal}
+        onClose={() => setShowReportsModal(false)}
+      />
     </DashboardContainer>
   );
 };

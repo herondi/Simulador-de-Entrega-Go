@@ -14,15 +14,23 @@ import {
 const MapContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  height: 100%;
+  height: 100vh;
+  position: relative;
 `;
 
 const MapHeader = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 `;
 
 const Title = styled.h1`
@@ -75,12 +83,12 @@ const ControlButton = styled(motion.button)`
 `;
 
 const MapWrapper = styled.div`
-  flex: 1;
-  border-radius: 16px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  position: relative;
-  min-height: 600px;
 `;
 
 const GoogleMap = styled.div`
@@ -90,13 +98,15 @@ const GoogleMap = styled.div`
 
 const MapOverlay = styled.div`
   position: absolute;
-  top: 1rem;
+  top: 90px;
   right: 1rem;
   background: white;
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  min-width: 250px;
+  min-width: 320px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
   z-index: 1000;
 `;
 
@@ -216,7 +226,7 @@ const DeliveryMap = () => {
   const initializeMap = async () => {
     try {
       const loader = new Loader({
-        apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY',
+        apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
         version: 'weekly',
         libraries: ['places']
       });
@@ -245,10 +255,13 @@ const DeliveryMap = () => {
 
   const loadDrivers = async () => {
     try {
-      const response = await axios.get('/drivers');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+      const response = await axios.get(`${apiUrl}/drivers`);
       setDrivers(response.data.drivers || []);
     } catch (error) {
       console.error('Error fetching drivers:', error);
+      // Fallback para dados mock se a API não estiver disponível
+      setDrivers([]);
     }
   };
 

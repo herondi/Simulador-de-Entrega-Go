@@ -8,7 +8,7 @@ ENV REACT_APP_GOOGLE_MAPS_API_KEY=${REACT_APP_GOOGLE_MAPS_API_KEY}
 
 # Copiar arquivos de dependências e instalar
 COPY package.json ./
-RUN npm install
+RUN npm install --no-package-lock
 
 # Copiar código fonte e fazer build
 COPY . .
