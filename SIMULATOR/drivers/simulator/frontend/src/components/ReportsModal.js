@@ -10,7 +10,7 @@ import {
   FiClock,
   FiUsers,
   FiDownload,
-  FiBarChart3
+  FiBarChart
 } from 'react-icons/fi';
 
 const ModalOverlay = styled(motion.div)`
@@ -394,7 +394,7 @@ const ReportsModal = ({ isOpen, onClose }) => {
     {
       title: 'Taxa de Sucesso',
       value: `${reportData.successRate}%`,
-      icon: FiBarChart3,
+      icon: FiBarChart,
       gradient: '#00bcd4, #4dd0e1',
       change: '+2%'
     }
